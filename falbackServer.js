@@ -11,8 +11,8 @@ var app = express();
 var bodyParser = require('body-parser');
 var json_body_parser = bodyParser.json();//this is used to prevent empty reponse in api.ai
 var request = require('request');
-//app.use(bodyParser.json());
-//var path    = require("path");
+app.use(bodyParser.json());
+var path    = require("path");
 const proxy='http://proxy.tcs.com:8080';// or blank for without proxy
 //const proxy = '';
 app.post('/fallback',json_body_parser, function (req, res) //2nd parameter is used to prevent empty string error in api.ai
