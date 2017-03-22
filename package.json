@@ -2,10 +2,10 @@
   "name": "arcsoftech-webhook",
   "version": "1.0.0",
   "description": "This is an api for webhook in api.ai",
-  "main": "server.js",
+  "main": "falbackServer.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node falbackServer.js"
   },
   "repository": {
     "type": "git",
