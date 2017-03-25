@@ -1,11 +1,11 @@
 {
   "name": "arcsoftech-webhook",
   "version": "1.0.0",
-  "description": "This is an api displaying coversation relay from chatbot to helpdesk",
-  "main": "falbackServer.js",
+  "description": "This is an api communication server of helpdesk",
+  "main": "communicationServer.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node falbackServer.js"
+    "start": "node communicationServer.js"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
     "express": "^4.15.2",
     "json-socket": "^0.2.1",
     "net": "^1.0.2",
-     "os": "^0.1.1",
     "request": "^2.81.0",
     "socket.io": "^1.4.6"
   },
