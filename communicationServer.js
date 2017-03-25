@@ -59,7 +59,7 @@ io.sockets.on('connection', function (socket) {
     });
 	socket.on('sendapi', function (data) {
 		var port = 9838; //The same port that the server is listening on
-		var host = 'https://fallbackserver.herokuapp.com/';
+		var host = 'https://fallbackserver.herokuapp.com';
 		var socket = new JsonSocket(new net.Socket()); //Decorate a standard net.Socket with JsonSocket
 		socket.connect(port, host);
         response.flag=1;
