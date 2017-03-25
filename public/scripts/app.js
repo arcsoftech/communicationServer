@@ -3,7 +3,7 @@
 var app = angular.module('myApp', []);
 
 /* Controllers */
-app.controller('AppCtrl', function ($scope, socket,uuid) {
+app.controller('AppCtrl', function ($scope, socket) {
 //console.log(uuid.v4());
   $scope.users = [];
   $scope.curtrentUser = '';
