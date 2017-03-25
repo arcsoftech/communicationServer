@@ -9,7 +9,7 @@ var port = app.get('port');
 app.use(bodyParser.json());
 app.use(express.static('public'));
 server.listen(port, function () {
-    console.log("Server listening on: "+https://fallbackserver.herokuapp.com/+":%s", port);
+    console.log("Server listening on: "https://fallbackserver.herokuapp.com/+":%s", port);
 });
 
 app.get('/', function (req, res) {
