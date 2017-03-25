@@ -17,8 +17,8 @@ app.use(bodyParser.json());
 var path = require("path");
 var net = require('net'),
     JsonSocket = require('json-socket');
-const proxy='http://proxy.tcs.com:8080';// or blank for without proxy
-//const proxy = '';
+//const proxy='http://proxy.company.com:8080';// or blank for without proxy
+const proxy = '';
 
 var port = 9838;
 var server = net.createServer();
