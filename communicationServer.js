@@ -1,17 +1,15 @@
 var net = require('net'),JsonSocket = require('json-socket');
-var os = require("os");
 var bodyParser = require('body-parser'),json_body_parser = bodyParser.json();
 var express = require('express');
 var app = express();
 app.set('port', process.env.PORT || 9000);
-var hostname = os.hostname();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var port = app.get('port');
 app.use(bodyParser.json());
 app.use(express.static('public'));
 server.listen(port, function () {
-    console.log("Server listening on: "+hostname+":%s", port);
+    console.log("Server listening on: "+https://fallbackserver.herokuapp.com/+":%s", port);
 });
 
 app.get('/', function (req, res) {
@@ -61,7 +59,7 @@ io.sockets.on('connection', function (socket) {
     });
 	socket.on('sendapi', function (data) {
 		var port = 9838; //The same port that the server is listening on
-		var host = hostname;
+		var host = "https://fallbackserver.herokuapp.com";
 		var socket = new JsonSocket(new net.Socket()); //Decorate a standard net.Socket with JsonSocket
 		socket.connect(port, host);
         response.flag=1;
