@@ -7,7 +7,7 @@
 
 //Initialization
 var express = require('express');
-var communication = require('./communicationServer.js')
+var communication = require('./communicationServer.js');
 var app = express();
 var bodyParser = require('body-parser');
 var json_body_parser = bodyParser.json();//this is used to prevent empty reponse in api.ai
