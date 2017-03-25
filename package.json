@@ -1,11 +1,12 @@
 {
   "name": "arcsoftech-webhook",
   "version": "1.0.0",
-  "description": "This is an api for webhook in api.ai",
+  "description": "This is an api displaying coversation relay from chatbot to helpdesk",
   "main": "falbackServer.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node falbackServer.js"
+    "start1":"node communicationServer.js"
   },
   "repository": {
     "type": "git",
@@ -17,9 +18,12 @@
   "author": "Arihant Chhajed",
   "license": "ISC",
    "dependencies": {
+    "body-parser": "^1.17.1",
     "express": "^4.15.2",
-    "request":"^2.81.0",
-    "body-parser":"^1.17.1"
+    "json-socket": "^0.2.1",
+    "net": "^1.0.2",
+    "request": "^2.81.0",
+    "socket.io": "^1.4.6"
   },
   "bugs": {
     "url": "https://github.com/arcsoftech/fallbackserver/issues"
