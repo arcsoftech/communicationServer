@@ -1,143 +1,117 @@
-var net = require('net'),JsonSocket = require('json-socket');
-var bodyParser = require('body-parser'),json_body_parser = bodyParser.json();
+/*
+ *Author:Arihant Chhajed
+ *Language:Node.JS
+ *License:Free
+*/
+
+
+//Initialization
 var express = require('express');
 var app = express();
-app.set('port', process.env.PORT || 9000);
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
-var port = app.get('port');
+var os = require("os");
+var hostname = os.hostname();
+var bodyParser = require('body-parser');
+var json_body_parser = bodyParser.json();//this is used to prevent empty reponse in api.ai
+var request = require('request');
 app.use(bodyParser.json());
-app.use(express.static('public'));
-server.listen(port, function () {
-    console.log("Server listening on: http://localhost:%s", port);
-});
+var path = require("path");
+var net = require('net'),
+    JsonSocket = require('json-socket');
+const proxy='http://proxy.tcs.com:8080';// or blank for without proxy
+//const proxy = '';
 
-app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/index.html');
-});
+var port = 9838;
+var server = net.createServer();
+server.listen(port);
 
-var usernames = {};
-var rooms = [];
-var response={"flag":0,"message":""};
-
-io.sockets.on('connection', function (socket) {
-    
-    socket.on('adduser', function (data) {
-        var username = data.username;
-        var room = data.room;
-        console.log(rooms);
-		var result  = rooms.find(o => o.roomid === room);
-        if (result.length!=0) {
-            socket.username = username;
-            socket.room = room;
-            usernames[username] = username;
-            socket.join(room);
-            socket.emit('updatechat', 'SERVER', 'You are connected. Please wait for any user query.');
-            //socket.broadcast.to(room).emit('updatechat', 'SERVER', username + ' has connected to this room');
-        } else {
-            socket.emit('updatechat', 'SERVER', 'Please enter valid code.');
-        }
-    });
-    
-    socket.on('createroom', function (data) {
-        var new_room = ("" + Math.random()).substring(2, 7);
-		var room={
-			'username':data.username,
-			'roomid':new_room,
-			'status':1,
-			'coversationId':''
-		}
-        rooms.push(room);
-        data.room = new_room;
-        socket.emit('updatechat', 'SERVER', 'Your room is ready, using this ID:' + new_room);
-        socket.emit('roomcreated', data);
-
-    });
-
-    socket.on('sendchat', function (data) {
-        io.sockets.in(socket.room).emit('updatechat', socket.username, data);
-    });
-	socket.on('sendapi', function (data) {
-		var port = 9838; //The same port that the server is listening on
-		var host = '127.0.0.1';
-		var socket = new JsonSocket(new net.Socket()); //Decorate a standard net.Socket with JsonSocket
-		socket.connect(port, host);
-        response.flag=1;
-		response.message=data;
-		console.log(response);
-		socket.on('connect', function() 
-		{ //Don't send until we're connected
-			socket.sendMessage(response);
-			socket.on('message', function(message) 
+  
+	app.post('/fallback',json_body_parser, function (req, res) //2nd parameter is used to prevent empty string error in api.ai
+	{
+		var pollingResponse=[];
+		res.set('Content-Type', 'application/json');
+		var options = 
+		{ 
+			method: 'POST',
+			url: 'http://'+hostname+':9000/sendtohelpdesk',
+			headers: 
+			{ 
+				'cache-control': 'no-cache',
+				'content-type': 'application/json' 
+			},
+			body: { query: req.body.result.resolvedQuery,sessionId: req.body.sessionId },
+			json: true 
+		};
+		console.log(options);
+		request(options, function (error, response, body) 
+		{
+			if (error) 
 			{
-				console.log('The result is: '+message.result);
-			});		
+				console.log("API call Failed")
+				var errorResponse=
+				{
+					"status": 
+					{
+						"code": 206,
+						"errorType": "partial_content",
+						"errorDetails": "Webhook call failed. Status code 503. Error:503 Service Unavailable"
+					}
+				}
+				res.end(JSON.stringify(errorResponse));
+				throw new Error(error);
+			}
+			else
+			{
+				if(body!=null)
+				{	
+					var fulfillment=
+					{
+						"speech": body,
+						"source": "Arcsoftech-Webhook",
+						"displayText": body
+					}
+					res.end(JSON.stringify(fulfillment));
+				}
+				else
+				{
+					
+					server.on('connection', function(socket) 
+					{ //This is a standard net.Socket
+                    //socket.connect();
+					socket = new JsonSocket(socket); //Now we've decorated the net.Socket to be a JsonSocket
+					socket.on('message', function(message) 
+					{
+						var result = message.a + message.b;
+						console.log(message);
+						var fulfillment=
+					{
+						"speech": message.message,
+						"source": "Arcsoftech-Webhook",
+						"displayText": message.message
+					}
+					//socket.disconnect();
+					res.end(JSON.stringify(fulfillment));
+					console.log("sent")
+					
+						//socket.sendEndMessage({result: result});
+					});
+					});
+				}
+			}
 		});
-    });
-     
-    socket.on('disconnect', function () {
-        delete usernames[socket.username];
-        io.sockets.emit('updateusers', usernames);
-        if (socket.username !== undefined) {
-            socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
-            socket.leave(socket.room);
-        }
-    });
-	
-	socket.on('timeout',function(data){
-		for(var i=0;i<rooms.length;i++)
-			 {
-				 if(rooms[i].username==data)
-				 {
-					 rooms[i].status=1;
-					 rooms[i].conversationId="";
-					 break;
-				 }
-			 }
 	});
-	
-	  
-	
-});
 
 
-app.post('/sendtohelpdesk',json_body_parser,function(req,res){
-	console.log(req.body);
-		var availRoom=rooms.find(o => o.status === 0 && o.conversationId === req.body.sessionId);
-		console.log(availRoom);
-		if(availRoom!=undefined && availRoom.length!=0)
-		{
-			io.sockets.in(availRoom.roomid).emit('updatechat', "Customer", req.body.query);
-			//res.end();
-						
-		}
-		else
-		{	
-	
-		availRoom=rooms.find(o => o.status === 1 && o.coversationId === "");
-		if(availRoom!=undefined  && availRoom.length!=0)
-		{
-			 for(var i=0;i<rooms.length;i++)
-			 {
 
-				 if(rooms[i].roomid==availRoom.roomid)
-				 {
-					 rooms[i].status=0;
-					 rooms[i].conversationId=req.body.sessionId;
-					 break;
-				 }
-			 }
-			io.sockets.in(availRoom.roomid).emit('updatechat', "Customer", req.body.query);
-			res.end();
-			
-		}
-		else
-		{
-			res.end(JSON.stringify("We are soory there is no helpdesk executive available right now.PLease try after sometime."))
-		}
-		}
-		
-		res.end();
-			
-						
+   // });
+
+
+
+
+app.set('port', (process.env.PORT || 5000));
+
+//For avoidong Heroku $PORT error
+app.get('/', function(request, response) {
+   response.sendFile(path.join(__dirname+'/template.html'));
+}).listen(app.get('port'), function() {
+    console.log('App is running, server is listening on port ', app.get('port'));
 });
