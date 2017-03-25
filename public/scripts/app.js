@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('myApp', ["angular-uuid"]);
+var app = angular.module('myApp', []);
 
 /* Controllers */
 app.controller('AppCtrl', function ($scope, socket,uuid) {
