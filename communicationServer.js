@@ -11,7 +11,7 @@ app.use(express.static('public'));
 server.listen(port, function () {
     console.log("Server listening on:%s", port);
 });
-
+var portAddrees;
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
@@ -58,7 +58,7 @@ io.sockets.on('connection', function (socket) {
         io.sockets.in(socket.room).emit('updatechat', socket.username, data);
     });
 	socket.on('sendapi', function (data) {
-		var port = 9838; //The same port that the server is listening on
+		var port = portAddrees; //The same port that the server is listening on
 		var host = 'fallbackserver.herokuapp.com';
 		var socket = new JsonSocket(new net.Socket()); //Decorate a standard net.Socket with JsonSocket
 		socket.connect(port, host);
@@ -103,6 +103,8 @@ io.sockets.on('connection', function (socket) {
 
 app.post('/sendtohelpdesk',json_body_parser,function(req,res){
 	console.log(req.body);
+	portAddrees=req.body.portAddress;
+	console.log("Port received from server",portAddress);
 		var availRoom=rooms.find(o => o.status === 0 && o.conversationId === req.body.sessionId);
 		console.log(availRoom);
 		if(availRoom!=undefined && availRoom.length!=0)
